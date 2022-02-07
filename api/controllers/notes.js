@@ -3,82 +3,79 @@ const Note = require('../models/Note')
 const User = require('../models/User')
 const userExtractor = require('../middlewares/userExtractor')
 
-
 notesRouter.get('/', async (request, response) => {
-	const notes = await Note.find({}).populate('user', {
-		notes: 0
-	})
-	response.json(notes)
+  const notes = await Note.find({}).populate('user', {
+    notes: 0
+  })
+  response.json(notes)
 })
 
 notesRouter.get('/:id', (request, response, next) => {
-	const { id } = request.params
+  const { id } = request.params
 
-	Note.findById(id)
-		.then(note => {
-			if (note) {
-				return response.json(note).end()
-			} else {
-				response.status(404).end()
-			}
-		}).catch(err => next(err))
+  Note.findById(id)
+    .then(note => {
+      if (note) {
+        return response.json(note).end()
+      } else {
+        response.status(404).end()
+      }
+    }).catch(err => next(err))
 })
 
 notesRouter.post('/', userExtractor, async (request, response, next) => {
-	const note = request.body
+  const note = request.body
 
-	if (!note || !note.content) {
-		return response.status(400).json({
-			error: 'note.content is missing'
-		})
-	}
+  if (!note || !note.content) {
+    return response.status(400).json({
+      error: 'note.content is missing'
+    })
+  }
 
-	const { userId } = request
- 
-	const user = await User.findById(userId)
+  const { userId } = request
 
-	const newNote = new Note({
-		content: note.content,
-		important: typeof note.important !== 'undefined' ? note.important : false,
-		date: new Date(),
-		user: user._id
-	})
+  const user = await User.findById(userId)
 
-	try {
-		const savedNote = await newNote.save()
+  const newNote = new Note({
+    content: note.content,
+    important: typeof note.important !== 'undefined' ? note.important : false,
+    date: new Date(),
+    user: user._id
+  })
 
-		user.notes = user.notes.concat(savedNote._id)
-		await user.save()
+  try {
+    const savedNote = await newNote.save()
 
-    	response.json(savedNote)
-	} catch (error) {
-		next(error)
-	}
+    user.notes = user.notes.concat(savedNote._id)
+    await user.save()
 
+    response.json(savedNote)
+  } catch (error) {
+    next(error)
+  }
 })
 
 notesRouter.put('/:id', userExtractor, (request, response, next) => {
-	const id = request.params.id
+  const id = request.params.id
 
-	const note = request.body
+  const note = request.body
 
-	const newNoteInfo = {
-		content: note.content,
-		important: note.important
-	}
-	
-	Note.findByIdAndUpdate(id, newNoteInfo, { new: true })
-		.then(result => {
-			response.status(200).json(result).end()
-		}).catch(err =>next(err))
+  const newNoteInfo = {
+    content: note.content,
+    important: note.important
+  }
+
+  Note.findByIdAndUpdate(id, newNoteInfo, { new: true })
+    .then(result => {
+      response.status(200).json(result).end()
+    }).catch(err => next(err))
 })
 
 notesRouter.delete('/:id', userExtractor, async (request, response, next) => {
-	const { id } = request.params
-	
-	await Note.findByIdAndDelete(id)
-	response.status(204).end()
-	
+  const { id } = request.params
+
+  await Note.findByIdAndDelete(id)
+  response.status(204).end()
 })
 
 module.exports = notesRouter

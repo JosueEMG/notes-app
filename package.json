@@ -12,11 +12,15 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "npm run build --workspace=app",
-    "start": "npm run start --workspace=api",
+    "build": "cross-env SKIP_PREFLIGHT_CHECK=true npm run build --workspace=app",
+    "start": "cross-env SKIP_PREFLIGHT_CHECK=true npm run build && npm run start --workspace=api",
+    "lint": "eslint ./api ./app",
+    "lint:fix": "npm run lint -- --fix",
     "dev:api": "npm run build && npm run dev --workspace=api"
   },
   "eslintConfig": {
+    "ignorePatterns": "build",
+    "extends": "./node_modules/standard/eslintrc.json",
     "env": {
       "jest": true,
       "cypress/globals": true
@@ -26,8 +30,8 @@
     ]
   },
   "devDependencies": {
-    "standard": "16.0.4",
-    "eslint-plugin-cypress": "^2.12.1"
+    "eslint-plugin-cypress": "^2.12.1",
+    "standard": "16.0.4"
   },
   "keywords": [],
   "author": "",

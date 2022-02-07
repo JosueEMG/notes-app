@@ -6,65 +6,64 @@ const User = require('../models/User')
 const { api, getUsers } = require('./helpers')
 
 describe.only('creating a new user', () => {
-    beforeEach(async () => {
-        await User.deleteMany({})
+  beforeEach(async () => {
+    await User.deleteMany({})
 
-        const passwordHash = await bcrypt.hash('psw', 10)
-        const user = new User({
-            username: 'josueemg',
-            passwordHash
-        })
-
-        await user.save()
+    const passwordHash = await bcrypt.hash('psw', 10)
+    const user = new User({
+      username: 'josueemg',
+      passwordHash
     })
 
-    test('works as expected creating a fresh username', async () => {
-        const usersAtStart = await getUsers()
+    await user.save()
+  })
 
-        const newUser = {
-            username: 'midudev',
-            name: 'Hola',
-            password: 'twitch'
-        }
+  test('works as expected creating a fresh username', async () => {
+    const usersAtStart = await getUsers()
 
-        await api
-            .post('/api/users')
-            .send(newUser)
-            .expect(201)
-            .expect('Content-Type', /application\/json/)
+    const newUser = {
+      username: 'midudev',
+      name: 'Hola',
+      password: 'twitch'
+    }
 
-        const usersAtEnd = await getUsers()
-        
-        expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
 
-        const username = usersAtEnd.map(user => user.username)
-        expect(username).toContain(newUser.username)
-    })
+    const usersAtEnd = await getUsers()
 
-    test('creation fails with proper status coide and message if username ius already taken', async () => {
-        const usersAtStart = await getUsers()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
 
-        const newUser = {
-            username: 'josueemg',
-            name: 'asfa',
-            password: 'eafaf'
-        }
+    const username = usersAtEnd.map(user => user.username)
+    expect(username).toContain(newUser.username)
+  })
 
-        const result = await api
-            .post('/api/users')
-            .send(newUser)
-            .expect(400)
-            .expect('Content-Type', /application\/json/)
+  test('creation fails with proper status coide and message if username ius already taken', async () => {
+    const usersAtStart = await getUsers()
 
-        expect(result.body).toContain('`username` to be unique')
-        
-        const usersAtEnd = await getUsers()
-        expect(usersAtEnd).toHaveLength(usersAtStart.length)
+    const newUser = {
+      username: 'josueemg',
+      name: 'asfa',
+      password: 'eafaf'
+    }
 
-    })
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
 
-    afterAll(() => {
-        mongoose.connection.close()
-        server.close()
-    })
+    expect(result.body).toContain('`username` to be unique')
+
+    const usersAtEnd = await getUsers()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  afterAll(() => {
+    mongoose.connection.close()
+    server.close()
+  })
 })
