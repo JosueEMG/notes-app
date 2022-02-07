@@ -1,0 +1,14 @@
+POST http://localhost:3001/api/notes 
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxZWFjZmQ3MGY5NzE1MWE5YjM4MTY4NCIsInVzZXJuYW1lIjoiam9zdWVlbWciLCJpYXQiOjE2NDI4MTg0NjAsImV4cCI6MTY0MzQyMzI2MH0.z0B15uPovG4dUtqAsVStVmgQwFbaTxRWX1XCo38wip0
+
+{
+    "content": "Otra nota mas v3",
+    "important": true
+}
+
+###
+
+POST http://localhost:3001/api/notes 
+Content-Type: application/json
+
