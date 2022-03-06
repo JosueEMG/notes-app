@@ -16,7 +16,8 @@
     "start": "cross-env SKIP_PREFLIGHT_CHECK=true npm run build && npm run start --workspace=api",
     "lint": "eslint ./api ./app",
     "lint:fix": "npm run lint -- --fix",
-    "dev:api": "npm run build && npm run dev --workspace=api"
+    "dev:app": "cross-env SKIP_PREFLIGHT_CHECK=true npm run start --workspace=app",
+    "dev:api": "npm run dev --workspace=api"
   },
   "eslintConfig": {
     "ignorePatterns": "build",

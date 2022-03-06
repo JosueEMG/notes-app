@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "start": "cross-env NODE_ENV=production node index.js",
-    "start:test": "cross-env NODE_ENV=test node index.js",
-    "test": "cross-env NODE_ENV=test PORT=3003 jest --verbose ./tests/user.test.js",
+    "dev": "NODE_ENV=development nodemon index.js",
+    "start": "NODE_ENV=production node index.js",
+    "start:test": "NODE_ENV=test node index.js",
+    "test": "NODE_ENV=test PORT=3003 jest --verbose ./tests/user.test.js",
     "test:watch": "npm run test -- --watch"
   },
   "keywords": [],

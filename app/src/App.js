@@ -1,110 +1,75 @@
-import './styles/styles.css'
-import React, { useEffect, useState } from 'react'
-import Note from './components/Note'
-import Notification from './components/Notification'
+import React, { useState } from 'react'
+import { Link, BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
+import LoginForm from './components/LoginForm'
+import { NoteDetail } from './components/NoteDetail'
+import { StyledLink } from './components/StyledLink'
+import useNotes from './hooks/useNotes'
+import { useUser } from './hooks/useUser'
+import Notes from './Notes'
 import {
-  create as createNote,
   getAll as getAllNotes,
-  update as updateNote,
   setToken
 } from './services/notes'
-import LoginForm from './components/LoginForm'
-import NoteForm from './components/NoteForm'
 
-export default function App () {
-  const [notes, setNotes] = useState([])
+const Home = () => <h1>Home page</h1>
 
-  const [showAll, setShowAll] = useState(true)
+const Users = () => <h1>Users</h1>
+
+const inlineStyles = {
+  padding: 5
+}
+
+const App = () => {
+  const { notes } = useNotes()
   const [errorMessage, setErrorMessage] = useState(null)
-
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    getAllNotes()
-      .then(notes => {
-        setNotes(notes)
-      })
-  }, [])
-
-  const handlelogout = () => {
-    setUser(null)
-    setToken(user.token)
-    window.localStorage.removeItem('loggedNoteAppUser')
-  }
-
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteAppUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      setToken(user.token)
-    }
-  }, [])
-
-  const addNote = (noteObject) => {
-    createNote(noteObject)
-      .then(returnedNote => {
-        setNotes(prevNotes => prevNotes.concat(returnedNote))
-      })
-      .catch(() => {
-        setErrorMessage('La API ha petado')
-      })
-  }
-
-  const toggleImportanceOf = (id) => {
-    const note = notes.find(n => n.id === id)
-    const changedNote = { ...note, important: !note.important }
-
-    updateNote(id, changedNote)
-      .then(returnedNote => {
-        setNotes(notes.map(note => note.id !== id ? note : returnedNote))
-      })
-      .catch(() => {
-        setErrorMessage(
-                    `Note '${note.content}' was already removed from server`
-        )
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
-      })
-  }
+  const { user } = useUser()
 
   const saveTokenInLocalStorage = (user) => {
     window.localStorage.setItem('loggedNoteAppUser', JSON.stringify(user))
     setToken(user.token)
-    setUser(user)
   }
 
-  const notesToShow = showAll
-    ? notes
-    : notes.filter(note => note.important)
-
   return (
-    <div>
-      <h1>Notes</h1>
-
-      <Notification message={errorMessage} />
-
-      {
-                user
-                  ? <NoteForm addNote={addNote} handleLogout={handlelogout} />
-                  : <LoginForm saveTokenInLocalStorage={saveTokenInLocalStorage} setErrorMessage={setErrorMessage} />
-            }
-
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-      </div>
-      <ul>
-        {notesToShow.map((note, i) => (
-          <Note
-            key={i}
-            note={note}
-            toggleImportance={() => toggleImportanceOf(note.id)}
-          />
-        ))}
-      </ul>
-    </div>
+    <BrowserRouter>
+      <header>
+        <StyledLink to='/' style={inlineStyles}>
+          Home
+        </StyledLink>
+        <StyledLink to='/notes' style={inlineStyles}>
+          Notes
+        </StyledLink>
+        <StyledLink to='/users' style={inlineStyles}>
+          Users
+        </StyledLink>
+        {
+          user 
+            ? <em>Logged as {user.name}</em> 
+            : <StyledLink variant='bold' to='/login'>
+                Login
+              </StyledLink>
+        }
+        
+      </header>
+      <Switch>
+        <Route path='/login' render={() => {
+          return user ? <Redirect to="/" /> : <LoginForm saveTokenInLocalStorage={saveTokenInLocalStorage} setErrorMessage={setErrorMessage} />
+        }}>
+        </Route>
+        <Route path='/notes/:noteId'>
+          <NoteDetail notes={notes} />
+        </Route>
+        <Route path='/notes'>
+          <Notes />
+        </Route>
+        <Route path='/users'>
+          <Users />
+        </Route>
+        <Route path='/'>
+          <Home />
+        </Route>
+      </Switch>
+    </BrowserRouter>
   )
 }
+
+export default App

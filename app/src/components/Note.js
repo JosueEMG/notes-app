@@ -1,4 +1,6 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
+import { Button } from './Button'
 
 const Note = ({ note, toggleImportance }) => {
   const label = note.important
@@ -7,8 +9,8 @@ const Note = ({ note, toggleImportance }) => {
 
   return (
     <li className='note'>
-      {note.content}
-      <button onClick={toggleImportance}>{label}</button>
+      <Link to={`/notes/${note.id}`}>{note.content}</Link>
+      <Button onClick={toggleImportance}>{label}</Button>
     </li>
   )
 }

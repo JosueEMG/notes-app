@@ -1,9 +1,13 @@
 import React, { useState } from 'react'
 import Toggable from './Toggable'
-import { login } from '../services/login'
 import PropTypes from 'prop-types'
+import { useHistory } from 'react-router-dom'
+import { useUser } from '../hooks/useUser'
+import { Button, Form } from 'react-bootstrap'
 
-export default function LoginForm ({ saveTokenInLocalStorage, setErrorMessage }) {
+export default function LoginForm ({ setErrorMessage }) {
+  const history = useHistory()
+  const { login } = useUser()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -19,11 +23,8 @@ export default function LoginForm ({ saveTokenInLocalStorage, setErrorMessage })
     event.preventDefault()
 
     try {
-      const user = await login({
-        username,
-        password
-      })
-      saveTokenInLocalStorage(user)
+      login({ username, password })
+      history.push('/notes')
     } catch (error) {
       console.log(error)
       setErrorMessage('Wrong credentials')
@@ -32,27 +33,38 @@ export default function LoginForm ({ saveTokenInLocalStorage, setErrorMessage })
       }, 5000)
     }
   }
-
+  
   return (
-    <Toggable buttonLabel='Show login'>
+    //<Toggable buttonLabel='Show login'>
       <div>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <input type='text' value={username} placeholder='Username' onChange={handleUsernameChange} />
-          </div>
-          <div>
-            <input type='password' value={password} placeholder='Password' onChange={handlePasswordChange} />
-          </div>
-          <button id='form-login-button'>
-            Login
-          </button>
-        </form>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group id='username'>
+            <Form.Control 
+              type='text' 
+              value={username} 
+              name='Username'
+              placeholder='Username' 
+              onChange={handleUsernameChange} />
+          </Form.Group>
+          <Form.Group id='password'>
+            <Form.Control 
+              type='password' 
+              value={password} 
+              name='Password'
+              placeholder='Password' 
+              onChange={handlePasswordChange} />
+          </Form.Group>
+          <Form.Group>
+            <Button id='form-login-button'>
+              Login
+            </Button>
+          </Form.Group>
+        </Form>
       </div>
-    </Toggable>
+    //</Toggable>
   )
 }
 
 LoginForm.propTypes = {
-  saveTokenInLocalStorage: PropTypes.func.isRequired,
   setErrorMessage: PropTypes.func.isRequired
 }
